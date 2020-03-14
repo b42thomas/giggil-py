@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 import threading
 import queue
+import requests
 from time import sleep # Import the sleep function from the time module
 
 #pins
@@ -35,11 +36,11 @@ def getInput(r, c, prompt_string):
 #items list
 items = []
 
-def getItem(scanString, ID):
- for (currentItem : items):
+def getItem(scanString):
+ global items
+ for currentItem in items:
   if (currentItem.scanString == scanString):
-   if ((currentItem.ID == ID) or (currentItem.ID == -1)):
-    return currentItem
+   return currentItem
  return False
 
 def setup():
@@ -91,6 +92,21 @@ def scanObjectEvent(scanString):
  global items;
  #TODO: IMPLEMENT THIS METHOD
  print("String scanned: {0}".format(scanString))
+ 
+ item = getItem(scanString)
+ if (item == False):
+  item = Item(scanString)
+  
+  #call api
+  URL = "http://54.163.253.131/conveyorscan/"
+  URL = URL + scanString[1::]
+ # PARAMS = {"isbn":scanString[1::]}
+
+  response = requests.get(url=URL)
+  data = response.json()
+  print(data['slot'])
+ else:
+  item.Update()@jalkfdjdsakl
  
  
 
