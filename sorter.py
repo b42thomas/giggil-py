@@ -1,5 +1,4 @@
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
-import curses
 import threading
 import queue
 from time import sleep # Import the sleep function from the time module
@@ -8,37 +7,44 @@ from time import sleep # Import the sleep function from the time module
 TICK_SENSOR_PIN = 11
 
 #global vars
-textScreen = curses.initscr()
 tickStatus = GPIO.LOW
 tickCount = 0
 previousTickCount = tickCount
 scanBuffer = ""
 
 
-#class Item:
-# scanString
-# ID
-# pos
+class Item:
+ scanString = "phantom"
+ ID = -1
+ pos = -1
  
- #def Item(self,scanStr):
-  #self.scanString = scanStr
- #def setId(newId):
-  #ID = newId
+ def __init__(self,scanStr):
+  self.scanString = scanStr
+ def setId(newId):
+  ID = newId
  
 
 def getInput(r, c, prompt_string):
     global textScreen
     curses.echo() 
-    textScreen.addstr(r, c, prompt_string)
+    (r, c, prompt_string)
     textScreen.refresh()
     myInp = textScreen.getstr(r + 1, c, 20)
     return myInp  #
 
+#items list
+items = []
+
+def getItem(scanString, ID):
+ for (currentItem : items):
+  if (currentItem.scanString == scanString):
+   if ((currentItem.ID == ID) or (currentItem.ID == -1)):
+    return currentItem
+ return False
+
 def setup():
  print("setting up beep boop")
- global textScreen
- curses.noecho()
- textScreen.nodelay(True)
+
  GPIO.setwarnings(False) # Ignore warning for now
  GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
  GPIO.setup(11, GPIO.OUT) # Set pin 8 to be an output pin and set initial value to low (off)
@@ -51,7 +57,7 @@ def setup():
  
  
 def checkConfigChanges():
- textScreen.addstr(0,0,"checking config changes boop boop")
+ print("checking config changes boop boop")
 
 def updateTickSensor():
  global tickStatus
@@ -62,14 +68,16 @@ def updateTickSensor():
   return tickCount
 
 def updateOpticalSensor():
- textScreen.addstr(1,0,"Updating optical sensor boop")
+ print("Updating optical sensor boop")
+ ##TODO IMPLEMENT THIS METHOD
 
 def checkSensors():
   updateTickSensor()
   updateOpticalSensor()
   
 def updateItems(tickDiff):
- book1Pos += tickDiff
+ print("Updating the items")
+ #TODO IMPLEMENT THIS METHOD
 
 
 def updateObjects():
@@ -80,23 +88,19 @@ def updateObjects():
   previousTickCount = tickCount
 
 def scanObjectEvent(scanString):
- print("h")  
- textScreen.addstr(4,0,"String scanned: {0}".format(scanString))
+ global items;
+ #TODO: IMPLEMENT THIS METHOD
+ print("String scanned: {0}".format(scanString))
+ 
+ 
 
 def readScanInput():
  global textScreen
  while(True):
-  textScreen.addstr(5,0,"SCanning: ")
+  print("Scanning...")
   
-  scan_str = ""
-  temp_char = 'd'
-  while (temp_char != '\n'):
-   temp_str = textScreen.getch()
-   if (temp_str != curses.ERR) :
-    scan_str += str(temp_str)
-    textScreen.addStr(6,0,scan_str)
+  scan_str = input();
   scanObjectEvent(scan_str)
-  textScreen.addstr(5,0,"Sning: " + scan_str)
   
 
 
@@ -108,25 +112,17 @@ def mainLoop():
 
  scanThread = threading.Thread(target=readScanInput,args=(), daemon=True)
  scanThread.start()
- scan_str = ""
  
  while True: # Run forever
+  print("")
   checkConfigChanges()
   checkSensors()
-  tickCount+=1; #TODO REMOVE WHEN WE GET ENCODER
-
-  textScreen.addstr(3,0,"Tick count: {0}".format(tickCount))
-  
- 
-  textScreen.refresh()
   
 
+  print("Tick count: {0}".format(tickCount))
+  sleep(5)
 
 #Execution starts here
 setup()  
 mainLoop()
 
-#terminate curses
-curses.nocbreak()
-stdscr.keypad(False)
-curses.echo()
